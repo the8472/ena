@@ -458,17 +458,19 @@ where
     ///
     /// This is useful for fast-paths that want to avoid pointer-chasing.
     #[inline]
-    pub fn try_probe_value<'a, K1>(&'a self, id: K1) -> Option<&'a V>
+    pub fn try_probe_value<'a, K1>(&'a self, id: K1) -> &'a V
         where
             K1: Into<K>,
             K: 'a,
     {
-        let id = id.into();
-        let v = self.value(id);
-        if v.parent == id {
-            return Some(&v.value);
+        let mut id = id.into();
+        loop {
+            let v = self.value(id);
+            if v.parent == id {
+                return &v.value;
+            }
+            id = v.parent;
         }
-        None
     }
 }
 
